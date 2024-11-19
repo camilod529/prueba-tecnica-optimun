@@ -202,9 +202,10 @@ import {
   fetchTaxes,
   createProduct,
   updateProduct,
-  deleteProduct,
+  deleteProduct as deleteProductApi,
 } from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
+import { Product } from "../interfaces/interfaces";
 
 export default defineComponent({
   name: "Home",
@@ -317,7 +318,7 @@ export default defineComponent({
     };
 
     const deleteProduct = async (product) => {
-      await deleteProduct(product.id);
+      await deleteProductApi(product._id);
       await loadProducts();
     };
 

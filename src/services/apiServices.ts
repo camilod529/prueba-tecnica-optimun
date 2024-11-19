@@ -98,7 +98,7 @@ export const updateProduct = async (product: Product): Promise<Product> => {
   }
 };
 
-export const deleteProduct = async (id: number): Promise<void> => {
+export const deleteProduct = async (id: string): Promise<void> => {
   try {
     await axiosInstance.delete(`/product/${id}`);
   } catch (error) {
