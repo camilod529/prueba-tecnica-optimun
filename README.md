@@ -24,6 +24,12 @@ cd prueba-tecnica-optimun
 npm install
 ```
 
+3. Crea un archivo `.env.local` en la raíz del proyecto con la siguiente configuración:
+
+```sh
+VITE_API_BASE_URL=
+```
+
 ## Ejecución
 
 Para ejecutar la aplicación en modo desarrollo:
