@@ -176,6 +176,7 @@ import {
 } from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
 import { Product } from "../interfaces/interfaces";
+import { showAlert } from "../utils/alerts";
 
 export default defineComponent({
   name: "Home",
@@ -251,12 +252,30 @@ export default defineComponent({
     };
 
     const confirmModal = async () => {
-      if (modalType.value === "product") {
-        if (form.value._id) {
-          await productStore.updateProduct(form.value);
-        } else {
-          await productStore.createProduct(form.value);
+      try {
+        if (modalType.value === "product") {
+          if (form.value._id) {
+            await productStore.updateProduct(form.value);
+            showAlert(
+              "Producto actualizado",
+              "El producto ha sido actualizado con éxito",
+              "success"
+            );
+          } else {
+            await productStore.createProduct(form.value);
+            showAlert(
+              "Producto creado",
+              "El producto ha sido creado con éxito",
+              "success"
+            );
+          }
         }
+      } catch (error) {
+        showAlert(
+          "Error",
+          "Ocurrio un problema al guardar/actualizar el producto, por favor intentelo nuevamente",
+          "error"
+        );
       }
       closeModal();
     };

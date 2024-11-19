@@ -9,6 +9,7 @@ export const showAlert = (
     title,
     text,
     icon,
+    confirmButtonText: "Aceptar",
   });
 };
 
