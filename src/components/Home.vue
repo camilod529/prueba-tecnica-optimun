@@ -38,6 +38,15 @@
           :data="products"
           :hasActions="true"
         >
+          <template #name="{ row }">
+            <a
+              @click.prevent="viewProductDetails(row._id)"
+              href="#"
+              class="text-blue-500 hover:underline"
+            >
+              {{ row.name }}
+            </a>
+          </template>
           <template #actions="{ row }">
             <button
               @click="openEditModal('product', row)"
@@ -181,12 +190,45 @@
               multiple
               class="w-full px-4 py-2 border rounded"
             >
-              <option v-for="tax in taxes" :key="tax.id" :value="tax">
+              <option v-for="tax in taxes" :key="tax._id" :value="tax">
                 {{ tax.name }} ({{ tax.percentage }}%)
               </option>
             </select>
           </div>
         </form>
+      </div>
+      <div v-else-if="modalType === 'productDetails'">
+        <!-- Información adicional del producto -->
+        <div v-if="productDetails">
+          <p><strong>Nombre:</strong> {{ productDetails.name }}</p>
+          <p><strong>Código de Barras:</strong> {{ productDetails.barcode }}</p>
+          <p>
+            <strong>Presentación:</strong> {{ productDetails.presentation }}
+          </p>
+          <p><strong>Referencia:</strong> {{ productDetails.reference }}</p>
+          <p><strong>Descripción:</strong> {{ productDetails.description }}</p>
+          <p>
+            <strong>Servicio:</strong>
+            {{ productDetails.service ? "Sí" : "No" }}
+          </p>
+          <p>
+            <strong>Precio de Venta:</strong> {{ productDetails.selling_price }}
+          </p>
+          <p>
+            <strong>Costo del Producto:</strong>
+            {{ productDetails.product_cost }}
+          </p>
+          <p><strong>Categoría:</strong> {{ productDetails.category.name }}</p>
+          <p><strong>Impuestos:</strong></p>
+          <ul>
+            <li v-for="tax in productDetails.taxes" :key="tax._id">
+              {{ tax.name }} ({{ tax.percentage }}%)
+            </li>
+          </ul>
+        </div>
+        <div v-else>
+          <p>No se encontró información del producto.</p>
+        </div>
       </div>
     </Modal>
   </div>
@@ -202,7 +244,8 @@ import {
   fetchTaxes,
   createProduct,
   updateProduct,
-  deleteProduct as deleteProductApi,
+  deleteProduct,
+  getProductById,
 } from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
 import { Product } from "../interfaces/interfaces";
@@ -254,6 +297,8 @@ export default defineComponent({
       taxes: [],
     });
 
+    const productDetails = ref<Product | null>(null);
+
     const loadProducts = async () => {
       products.value = await fetchProducts(currentPage.value, limit.value);
       products.value.forEach((product) => {
@@ -300,13 +345,19 @@ export default defineComponent({
       isModalVisible.value = true;
     };
 
+    const viewProductDetails = async (id: string) => {
+      modalType.value = "productDetails";
+      modalTitle.value = "Detalles del Producto";
+      productDetails.value = await getProductById(id);
+      isModalVisible.value = true;
+    };
+
     const closeModal = () => {
       isModalVisible.value = false;
     };
 
     const confirmModal = async () => {
       if (modalType.value === "product") {
-        console.log(form.value);
         if (form.value._id) {
           await updateProduct(form.value);
         } else {
@@ -318,7 +369,7 @@ export default defineComponent({
     };
 
     const deleteProduct = async (product) => {
-      await deleteProductApi(product._id);
+      await deleteProduct(product._id);
       await loadProducts();
     };
 
@@ -367,8 +418,10 @@ export default defineComponent({
       modalTitle,
       modalType,
       form,
+      productDetails,
       openCreateModal,
       openEditModal,
+      viewProductDetails,
       closeModal,
       confirmModal,
       deleteProduct,

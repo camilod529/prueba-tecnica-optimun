@@ -42,9 +42,6 @@ export const fetchTaxes = async (): Promise<Tax[]> => {
 };
 
 export const createProduct = async (product: Product): Promise<Product> => {
-  console.log(product.category_id);
-  console.log(product.taxes);
-  console.log(typeof product.service);
   try {
     const response = await axiosInstance.post<{
       data: { newProduct: Product };
@@ -70,6 +67,7 @@ export const createProduct = async (product: Product): Promise<Product> => {
     throw error;
   }
 };
+
 export const updateProduct = async (product: Product): Promise<Product> => {
   try {
     const response = await axiosInstance.put<{ product: Product }>(
@@ -103,6 +101,18 @@ export const deleteProduct = async (id: string): Promise<void> => {
     await axiosInstance.delete(`/product/${id}`);
   } catch (error) {
     console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+export const getProductById = async (id: string): Promise<Product | null> => {
+  try {
+    const response = await axiosInstance.get<{ data: { product: Product } }>(
+      `/product/${id}`
+    );
+    return response.data.data.product;
+  } catch (error) {
+    console.error("Error fetching product:", error);
     throw error;
   }
 };

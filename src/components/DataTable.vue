@@ -25,7 +25,9 @@
             :key="column.key"
             class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
           >
-            {{ getNestedValue(row, column.key) }}
+            <slot :name="column.key" :row="row">
+              {{ getNestedValue(row, column.key) }}
+            </slot>
           </td>
           <td
             v-if="hasActions"
