@@ -177,6 +177,7 @@ import {
 } from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
 import { Product } from "../interfaces/interfaces";
+import { fetchTaxes } from "../services/apiServices";
 
 export default defineComponent({
   name: "Home",

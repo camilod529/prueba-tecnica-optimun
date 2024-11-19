@@ -49,10 +49,10 @@
       <span>Página {{ currentPage }}</span>
       <button
         @click="nextPage"
-        :disabled="products.length <= limit"
+        :disabled="products.length < limit"
         class="px-4 py-2 rounded"
         :class="
-          products.length <= limit
+          products.length < limit
             ? 'bg-gray-300 cursor-not-allowed'
             : 'bg-blue-500 text-white hover:bg-blue-700'
         "
