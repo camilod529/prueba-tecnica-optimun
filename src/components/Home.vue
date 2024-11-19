@@ -28,6 +28,34 @@
       <section>
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Productos</h2>
         <DataTable :columns="productColumns" :data="products" />
+        <!-- Paginación -->
+        <div class="flex justify-between items-center mt-4">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="px-4 py-2 rounded"
+            :class="
+              currentPage === 1
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-700'
+            "
+          >
+            Anterior
+          </button>
+          <span>Página {{ currentPage }}</span>
+          <button
+            @click="nextPage"
+            :disabled="products.length < limit"
+            class="px-4 py-2 rounded"
+            :class="
+              products.length < limit
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-blue-500 text-white hover:bg-blue-700'
+            "
+          >
+            Siguiente
+          </button>
+        </div>
       </section>
 
       <!-- Tabla Taxes -->
@@ -46,7 +74,7 @@ import {
   fetchCategories,
   fetchProducts,
   fetchTaxes,
-} from "../services/apiServices.ts";
+} from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
 
 export default defineComponent({
@@ -58,6 +86,9 @@ export default defineComponent({
     const products = ref([]);
     const taxes = ref([]);
 
+    const currentPage = ref(1);
+    const limit = ref(10);
+
     const categoryColumns = ref([
       { name: "Nombre", key: "name" },
       { name: "Fecha de creacion", key: "createdAt" },
@@ -66,7 +97,7 @@ export default defineComponent({
     const productColumns = ref([
       { name: "Nombre", key: "name" },
       { name: "Precio", key: "selling_price" },
-      { name: "Categoría", key: "category.name" }, // Updated key to access nested property
+      { name: "Categoría", key: "category.name" },
       { name: "Fecha de creacion", key: "createdAt" },
       { name: "Fecha de actualizacion", key: "updatedAt" },
     ]);
@@ -76,9 +107,17 @@ export default defineComponent({
       { name: "Porcentaje", key: "percentage" },
     ]);
 
+    const loadProducts = async () => {
+      products.value = await fetchProducts(currentPage.value, limit.value);
+      products.value.forEach((product) => {
+        product.createdAt = formatDate(product.createdAt);
+        product.updatedAt = formatDate(product.updatedAt);
+      });
+    };
+
     onMounted(async () => {
       categories.value = await fetchCategories();
-      products.value = await fetchProducts(1, 10); // Example: page 1, limit 10
+      await loadProducts();
       taxes.value = await fetchTaxes();
 
       stats.value = {
@@ -91,12 +130,19 @@ export default defineComponent({
         category.createdAt = formatDate(category.createdAt);
         category.updatedAt = formatDate(category.updatedAt);
       });
-
-      products.value.forEach((product) => {
-        product.createdAt = formatDate(product.createdAt);
-        product.updatedAt = formatDate(product.updatedAt);
-      });
     });
+
+    const nextPage = async () => {
+      currentPage.value++;
+      await loadProducts();
+    };
+
+    const prevPage = async () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+        await loadProducts();
+      }
+    };
 
     return {
       stats,
@@ -106,6 +152,10 @@ export default defineComponent({
       categoryColumns,
       productColumns,
       taxColumns,
+      currentPage,
+      limit,
+      nextPage,
+      prevPage,
     };
   },
 });
