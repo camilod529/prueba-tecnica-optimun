@@ -123,8 +123,16 @@ export default defineComponent({
       }
     };
 
-    onMounted(() => {
-      productStore.loadProducts();
+    onMounted(async () => {
+      try {
+        await productStore.loadProducts();
+      } catch (error) {
+        showAlert(
+          "Error de carga",
+          "Hubo un error al cargar los productos. Por favor, inténtelo de nuevo.",
+          "error"
+        );
+      }
     });
 
     return {
