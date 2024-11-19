@@ -10,6 +10,12 @@
           >
             {{ column.name }}
           </th>
+          <th
+            v-if="hasActions"
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+          >
+            Acciones
+          </th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
@@ -20,6 +26,12 @@
             class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
           >
             {{ getNestedValue(row, column.key) }}
+          </td>
+          <td
+            v-if="hasActions"
+            class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+          >
+            <slot name="actions" :row="row"></slot>
           </td>
         </tr>
       </tbody>
@@ -40,6 +52,10 @@ export default defineComponent({
     data: {
       type: Array as PropType<Array<Record<string, any>>>,
       required: true,
+    },
+    hasActions: {
+      type: Boolean,
+      default: false,
     },
   },
   methods: {
