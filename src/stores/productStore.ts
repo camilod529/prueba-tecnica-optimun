@@ -18,9 +18,6 @@ export const useProductStore = defineStore("productStore", {
   }),
   actions: {
     async loadProducts() {
-      console.log("Cargando productos...");
-      console.log(this.currentPage, this.limit);
-
       try {
         const response = await fetchProducts(this.currentPage, this.limit);
         this.products = response.products;
@@ -32,8 +29,6 @@ export const useProductStore = defineStore("productStore", {
           product.createdAt = formatDate(product.createdAt);
           product.updatedAt = formatDate(product.updatedAt);
         });
-        console.log(this.products);
-        console.log(this.currentPage, this.totalPages);
       } catch (error) {
         console.error("Error al cargar productos:", error);
       }
@@ -52,7 +47,6 @@ export const useProductStore = defineStore("productStore", {
       await this.loadProducts();
     },
     nextPage() {
-      console.log(this.currentPage, this.totalPages);
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
         this.loadProducts();
