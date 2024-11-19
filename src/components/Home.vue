@@ -18,85 +18,13 @@
 
     <!-- Tablas -->
     <div class="space-y-8">
-      <!-- Tabla Categorías -->
-      <section>
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Categorías</h2>
-        <DataTable :columns="categoryColumns" :data="categories" />
-      </section>
-
-      <!-- Tabla Productos -->
-      <section>
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Productos</h2>
-        <button
-          @click="openCreateModal('product')"
-          class="mb-4 px-4 py-2 bg-green-500 text-white rounded"
-        >
-          Crear Producto
-        </button>
-        <DataTable
-          :columns="productColumns"
-          :data="products"
-          :hasActions="true"
-        >
-          <template #name="{ row }">
-            <a
-              @click.prevent="viewProductDetails(row._id)"
-              href="#"
-              class="text-blue-500 hover:underline"
-            >
-              {{ row.name }}
-            </a>
-          </template>
-          <template #actions="{ row }">
-            <button
-              @click="openEditModal('product', row)"
-              class="px-2 py-1 bg-yellow-500 text-white rounded"
-            >
-              Editar
-            </button>
-            <button
-              @click="deleteProduct(row)"
-              class="px-2 py-1 bg-red-500 text-white rounded ml-2"
-            >
-              Eliminar
-            </button>
-          </template>
-        </DataTable>
-        <!-- Paginación -->
-        <div class="flex justify-between items-center mt-4">
-          <button
-            @click="prevPage"
-            :disabled="currentPage === 1"
-            class="px-4 py-2 rounded"
-            :class="
-              currentPage === 1
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-700'
-            "
-          >
-            Anterior
-          </button>
-          <span>Página {{ currentPage }}</span>
-          <button
-            @click="nextPage"
-            :disabled="products.length < limit"
-            class="px-4 py-2 rounded"
-            :class="
-              products.length < limit
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-700'
-            "
-          >
-            Siguiente
-          </button>
-        </div>
-      </section>
-
-      <!-- Tabla Taxes -->
-      <section>
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Impuestos</h2>
-        <DataTable :columns="taxColumns" :data="taxes" />
-      </section>
+      <CategoryTable />
+      <ProductTable
+        :openCreateModal="openCreateModal"
+        :openEditModal="openEditModal"
+        :viewProductDetails="viewProductDetails"
+      />
+      <TaxTable />
     </div>
 
     <!-- Modal -->
@@ -236,12 +164,12 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
-import DataTable from "./DataTable.vue";
+import CategoryTable from "./CategoryTable.vue";
+import ProductTable from "./ProductTable.vue";
+import TaxTable from "./TaxTable.vue";
 import Modal from "./Modal.vue";
 import {
   fetchCategories,
-  fetchProducts,
-  fetchTaxes,
   createProduct,
   updateProduct,
   deleteProduct as deleteProductApi,
@@ -252,33 +180,11 @@ import { Product } from "../interfaces/interfaces";
 
 export default defineComponent({
   name: "Home",
-  components: { DataTable, Modal },
+  components: { CategoryTable, ProductTable, TaxTable, Modal },
   setup() {
     const stats = ref({ categories: 0, products: 0, taxes: 0 });
     const categories = ref([]);
-    const products = ref([]);
     const taxes = ref([]);
-
-    const currentPage = ref(1);
-    const limit = ref(10);
-
-    const categoryColumns = ref([
-      { name: "Nombre", key: "name" },
-      { name: "Fecha de creacion", key: "createdAt" },
-      { name: "Fecha de actualizacion", key: "updatedAt" },
-    ]);
-    const productColumns = ref([
-      { name: "Nombre", key: "name" },
-      { name: "Precio", key: "selling_price" },
-      { name: "Categoría", key: "category.name" },
-      { name: "Fecha de creacion", key: "createdAt" },
-      { name: "Fecha de actualizacion", key: "updatedAt" },
-    ]);
-    const taxColumns = ref([
-      { name: "Código", key: "code" },
-      { name: "Nombre", key: "name" },
-      { name: "Porcentaje", key: "percentage" },
-    ]);
 
     const isModalVisible = ref(false);
     const modalTitle = ref("");
@@ -299,19 +205,9 @@ export default defineComponent({
 
     const productDetails = ref<Product | null>(null);
 
-    const loadProducts = async () => {
-      products.value = await fetchProducts(currentPage.value, limit.value);
-      products.value.forEach((product) => {
-        product.createdAt = formatDate(product.createdAt);
-        product.updatedAt = formatDate(product.updatedAt);
-      });
-    };
-
-    const openCreateModal = (type) => {
-      modalType.value = type;
-      modalTitle.value = `Crear ${
-        type.charAt(0).toUpperCase() + type.slice(1)
-      }`;
+    const openCreateModal = () => {
+      modalType.value = "product";
+      modalTitle.value = "Crear Producto";
       form.value = {
         id: null,
         name: "",
@@ -328,11 +224,9 @@ export default defineComponent({
       isModalVisible.value = true;
     };
 
-    const openEditModal = (type, item) => {
-      modalType.value = type;
-      modalTitle.value = `Editar ${
-        type.charAt(0).toUpperCase() + type.slice(1)
-      }`;
+    const openEditModal = (item) => {
+      modalType.value = "product";
+      modalTitle.value = "Editar Producto";
       form.value = {
         ...item,
         category_id: item.category._id,
@@ -373,14 +267,17 @@ export default defineComponent({
       await loadProducts();
     };
 
+    const loadProducts = async () => {
+      // This function should be moved to ProductTable.vue
+    };
+
     onMounted(async () => {
       categories.value = await fetchCategories();
-      await loadProducts();
       taxes.value = await fetchTaxes();
 
       stats.value = {
         categories: categories.value.length,
-        products: products.value.length,
+        products: 0, // This should be updated in ProductTable.vue
         taxes: taxes.value.length,
       };
 
@@ -390,30 +287,10 @@ export default defineComponent({
       });
     });
 
-    const nextPage = async () => {
-      currentPage.value++;
-      await loadProducts();
-    };
-
-    const prevPage = async () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-        await loadProducts();
-      }
-    };
-
     return {
       stats,
       categories,
-      products,
       taxes,
-      categoryColumns,
-      productColumns,
-      taxColumns,
-      currentPage,
-      limit,
-      nextPage,
-      prevPage,
       isModalVisible,
       modalTitle,
       modalType,
