@@ -1,9 +1,18 @@
 import axiosInstance from "../api/axiosInstance";
 
-export const fetchCategories = async () => {
+interface Category {
+  _id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const fetchCategories = async (): Promise<Category[]> => {
   try {
-    const response = await axiosInstance.get("/category");
-    return response.data;
+    const response = await axiosInstance.get<{ categories: Category[] }>(
+      "/category"
+    );
+    return response.data.categories;
   } catch (error) {
     console.error("Error fetching categories:", error);
     throw error;
@@ -13,6 +22,7 @@ export const fetchCategories = async () => {
 export const fetchProducts = async () => {
   try {
     const response = await axiosInstance.get("/product");
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -23,6 +33,7 @@ export const fetchProducts = async () => {
 export const fetchTaxes = async () => {
   try {
     const response = await axiosInstance.get("/tax");
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Error fetching taxes:", error);

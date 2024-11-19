@@ -47,6 +47,7 @@ import {
   fetchProducts,
   fetchTaxes,
 } from "../services/apiServices.ts";
+import { formatDate } from "../helpers/dateFormat";
 
 export default defineComponent({
   name: "Home",
@@ -58,8 +59,9 @@ export default defineComponent({
     const taxes = ref([]);
 
     const categoryColumns = ref([
-      { name: "ID", key: "id" },
       { name: "Nombre", key: "name" },
+      { name: "Fecha de creacion", key: "createdAt" },
+      { name: "Fecha de actualizacion", key: "updatedAt" },
     ]);
     const productColumns = ref([
       { name: "ID", key: "id" },
