@@ -74,7 +74,22 @@ export const updateProduct = async (product: Product): Promise<Product> => {
   try {
     const response = await axiosInstance.put<{ product: Product }>(
       `/product/${product._id}`,
-      product
+      {
+        id_category: product.category_id,
+        barcode: product.barcode,
+        name: product.name,
+        presentation: product.presentation,
+        reference: product.reference,
+        description: product.description,
+        service: product.service,
+        selling_price: product.selling_price,
+        product_cost: product.product_cost,
+        taxes: product.taxes.map((tax) => ({
+          code: tax.code,
+          name: tax.name,
+          percentage: tax.percentage,
+        })),
+      }
     );
     return response.data.product;
   } catch (error) {

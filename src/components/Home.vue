@@ -288,7 +288,15 @@ export default defineComponent({
       modalTitle.value = `Editar ${
         type.charAt(0).toUpperCase() + type.slice(1)
       }`;
-      form.value = { ...item, category_id: item.category._id };
+      form.value = {
+        ...item,
+        category_id: item.category._id,
+        taxes: item.taxes.map((tax) => ({
+          code: tax.code,
+          name: tax.name,
+          percentage: tax.percentage,
+        })),
+      };
       isModalVisible.value = true;
     };
 
