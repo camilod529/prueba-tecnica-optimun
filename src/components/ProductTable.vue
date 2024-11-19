@@ -66,7 +66,10 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import DataTable from "./DataTable.vue";
-import { fetchProducts, deleteProduct } from "../services/apiServices";
+import {
+  fetchProducts,
+  deleteProduct as deleteProductApi,
+} from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
 import { Product } from "../interfaces/interfaces";
 
@@ -121,7 +124,7 @@ export default defineComponent({
     };
 
     const deleteProduct = async (product: Product) => {
-      await deleteProduct(product._id);
+      await deleteProductApi(product._id);
       await loadProducts();
     };
 
