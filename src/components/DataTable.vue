@@ -19,7 +19,7 @@
             :key="column.key"
             class="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
           >
-            {{ row[column.key] }}
+            {{ getNestedValue(row, column.key) }}
           </td>
         </tr>
       </tbody>
@@ -40,6 +40,13 @@ export default defineComponent({
     data: {
       type: Array as PropType<Array<Record<string, any>>>,
       required: true,
+    },
+  },
+  methods: {
+    getNestedValue(obj: Record<string, any>, key: string) {
+      return key.split(".").reduce((nestedObj, keyPart) => {
+        return nestedObj ? nestedObj[keyPart] : "";
+      }, obj);
     },
   },
 });

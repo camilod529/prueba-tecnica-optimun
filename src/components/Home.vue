@@ -64,9 +64,11 @@ export default defineComponent({
       { name: "Fecha de actualizacion", key: "updatedAt" },
     ]);
     const productColumns = ref([
-      { name: "ID", key: "id" },
       { name: "Nombre", key: "name" },
       { name: "Precio", key: "selling_price" },
+      { name: "Categoría", key: "category.name" }, // Updated key to access nested property
+      { name: "Fecha de creacion", key: "createdAt" },
+      { name: "Fecha de actualizacion", key: "updatedAt" },
     ]);
     const taxColumns = ref([
       { name: "Código", key: "code" },
@@ -76,7 +78,7 @@ export default defineComponent({
 
     onMounted(async () => {
       categories.value = await fetchCategories();
-      products.value = await fetchProducts();
+      products.value = await fetchProducts(1, 10); // Example: page 1, limit 10
       taxes.value = await fetchTaxes();
 
       stats.value = {
@@ -84,6 +86,16 @@ export default defineComponent({
         products: products.value.length,
         taxes: taxes.value.length,
       };
+
+      categories.value.forEach((category) => {
+        category.createdAt = formatDate(category.createdAt);
+        category.updatedAt = formatDate(category.updatedAt);
+      });
+
+      products.value.forEach((product) => {
+        product.createdAt = formatDate(product.createdAt);
+        product.updatedAt = formatDate(product.updatedAt);
+      });
     });
 
     return {
