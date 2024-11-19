@@ -38,7 +38,9 @@
         <!-- Formulario para crear/editar productos -->
         <form @submit.prevent="saveProduct">
           <div class="mb-4">
-            <label class="block text-gray-700">Nombre</label>
+            <label class="block text-gray-700">
+              Nombre <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.name"
               type="text"
@@ -46,7 +48,9 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Código de Barras</label>
+            <label class="block text-gray-700">
+              Código de Barras <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.barcode"
               type="text"
@@ -54,7 +58,9 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Presentación</label>
+            <label class="block text-gray-700">
+              Presentación <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.presentation"
               type="text"
@@ -62,7 +68,9 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Referencia</label>
+            <label class="block text-gray-700">
+              Referencia <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.reference"
               type="text"
@@ -70,7 +78,9 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Descripción</label>
+            <label class="block text-gray-700">
+              Descripción <span class="text-red-500">*</span>
+            </label>
             <textarea
               v-model="form.description"
               class="w-full px-4 py-2 border rounded"
@@ -81,7 +91,9 @@
             <input v-model="form.service" type="checkbox" />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Precio de Venta</label>
+            <label class="block text-gray-700">
+              Precio de Venta <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.selling_price"
               type="number"
@@ -89,7 +101,9 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Costo del Producto</label>
+            <label class="block text-gray-700">
+              Costo del Producto <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.product_cost"
               type="number"
@@ -97,7 +111,9 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Categoría</label>
+            <label class="block text-gray-700">
+              Categoría <span class="text-red-500">*</span>
+            </label>
             <select
               v-model="form.category_id"
               class="w-full px-4 py-2 border rounded"
@@ -112,7 +128,9 @@
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-gray-700">Impuestos</label>
+            <label class="block text-gray-700">
+              Impuestos <span class="text-red-500">*</span>
+            </label>
             <select
               v-model="form.taxes"
               multiple
@@ -254,6 +272,26 @@ export default defineComponent({
     const confirmModal = async () => {
       try {
         if (modalType.value === "product") {
+          // Validation checks
+          if (
+            !form.value.name ||
+            !form.value.barcode ||
+            !form.value.presentation ||
+            !form.value.reference ||
+            !form.value.description ||
+            form.value.selling_price <= 0 ||
+            form.value.product_cost <= 0 ||
+            !form.value.category_id ||
+            form.value.taxes.length === 0
+          ) {
+            showAlert(
+              "Error",
+              "Por favor complete todos los campos obligatorios",
+              "error"
+            );
+            return;
+          }
+
           if (form.value._id) {
             await productStore.updateProduct(form.value);
             showAlert(
