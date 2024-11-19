@@ -69,6 +69,7 @@ import { defineComponent, computed, onMounted } from "vue";
 import { useProductStore } from "../stores/productStore";
 import DataTable from "./DataTable.vue";
 import { deleteProduct } from "../services/apiServices";
+import { showConfirmationAlert, showAlert } from "../utils/alerts";
 
 export default defineComponent({
   name: "ProductTable",
@@ -103,9 +104,22 @@ export default defineComponent({
     const totalProducts = computed(() => productStore.totalProducts);
 
     const deleteProduct = async (product) => {
-      await productStore.deleteProduct(product);
-      if (products.value.length === 0 && currentPage.value > 1) {
-        productStore.prevPage();
+      const confirmation = await showConfirmationAlert(
+        "Eliminar Producto",
+        "¿Estás seguro de eliminar este producto?",
+        "warning"
+      );
+
+      if (confirmation.isConfirmed) {
+        await productStore.deleteProduct(product);
+        if (products.value.length === 0 && currentPage.value > 1) {
+          productStore.prevPage();
+        }
+        showAlert(
+          "Producto eliminado",
+          "El producto ha sido eliminado con éxito",
+          "success"
+        );
       }
     };
 
