@@ -244,7 +244,7 @@ import {
   fetchTaxes,
   createProduct,
   updateProduct,
-  deleteProduct,
+  deleteProduct as deleteProductApi,
   getProductById,
 } from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
@@ -369,7 +369,7 @@ export default defineComponent({
     };
 
     const deleteProduct = async (product) => {
-      await deleteProduct(product._id);
+      await deleteProductApi(product._id);
       await loadProducts();
     };
 
