@@ -164,25 +164,24 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
+import { useProductStore } from "../stores/productStore";
 import CategoryTable from "./CategoryTable.vue";
 import ProductTable from "./ProductTable.vue";
 import TaxTable from "./TaxTable.vue";
 import Modal from "./Modal.vue";
 import {
   fetchCategories,
-  createProduct,
-  updateProduct,
-  deleteProduct as deleteProductApi,
   getProductById,
+  fetchTaxes,
 } from "../services/apiServices";
 import { formatDate } from "../helpers/dateFormat";
 import { Product } from "../interfaces/interfaces";
-import { fetchTaxes } from "../services/apiServices";
 
 export default defineComponent({
   name: "Home",
   components: { CategoryTable, ProductTable, TaxTable, Modal },
   setup() {
+    const productStore = useProductStore();
     const stats = ref({ categories: 0, products: 0, taxes: 0 });
     const categories = ref([]);
     const taxes = ref([]);
@@ -254,22 +253,16 @@ export default defineComponent({
     const confirmModal = async () => {
       if (modalType.value === "product") {
         if (form.value._id) {
-          await updateProduct(form.value);
+          await productStore.updateProduct(form.value);
         } else {
-          await createProduct(form.value);
+          await productStore.createProduct(form.value);
         }
-        await loadProducts();
       }
       closeModal();
     };
 
     const deleteProduct = async (product) => {
-      await deleteProductApi(product._id);
-      await loadProducts();
-    };
-
-    const loadProducts = async () => {
-      // This function should be moved to ProductTable.vue
+      await productStore.deleteProduct(product);
     };
 
     onMounted(async () => {
@@ -278,7 +271,7 @@ export default defineComponent({
 
       stats.value = {
         categories: categories.value.length,
-        products: 0, // This should be updated in ProductTable.vue
+        products: productStore.totalProducts,
         taxes: taxes.value.length,
       };
 

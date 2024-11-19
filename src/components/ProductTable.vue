@@ -65,14 +65,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, computed, onMounted } from "vue";
+import { useProductStore } from "../stores/productStore";
 import DataTable from "./DataTable.vue";
-import {
-  fetchProducts,
-  deleteProduct as deleteProductApi,
-} from "../services/apiServices";
-import { formatDate } from "../helpers/dateFormat";
-import { Product } from "../interfaces/interfaces";
+import { deleteProduct } from "../services/apiServices";
 
 export default defineComponent({
   name: "ProductTable",
@@ -91,65 +87,41 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props, { emit }) {
-    const products = ref<Product[]>([]);
-    const currentPage = ref(1);
-    const limit = ref(10);
-    const totalPages = ref(1);
-    const totalProducts = ref(0);
+  setup(props) {
+    const productStore = useProductStore();
 
-    const columns = ref([
+    const columns = computed(() => [
       { name: "Nombre", key: "name" },
       { name: "Precio", key: "selling_price" },
       { name: "Categoría", key: "category.name" },
-      { name: "Fecha de creacion", key: "createdAt" },
-      { name: "Fecha de actualizacion", key: "updatedAt" },
+      { name: "Fecha de creación", key: "createdAt" },
+      { name: "Fecha de actualización", key: "updatedAt" },
     ]);
+    const products = computed(() => productStore.products);
+    const currentPage = computed(() => productStore.currentPage);
+    const totalPages = computed(() => productStore.totalPages);
+    const totalProducts = computed(() => productStore.totalProducts);
 
-    const loadProducts = async () => {
-      const response = await fetchProducts(currentPage.value, limit.value);
-      products.value = response.products;
-      totalPages.value = response.meta.totalPages;
-      totalProducts.value = response.meta.totalProducts;
-      products.value.forEach((product) => {
-        product.createdAt = formatDate(product.createdAt);
-        product.updatedAt = formatDate(product.updatedAt);
-      });
-      emit("refreshProducts");
-    };
-
-    const nextPage = async () => {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-        await loadProducts();
+    const deleteProduct = async (product) => {
+      await productStore.deleteProduct(product);
+      if (products.value.length === 0 && currentPage.value > 1) {
+        productStore.prevPage();
       }
     };
 
-    const prevPage = async () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-        await loadProducts();
-      }
-    };
-
-    const deleteProduct = async (product: Product) => {
-      await deleteProductApi(product._id);
-      await loadProducts();
-    };
-
-    onMounted(loadProducts);
+    onMounted(() => {
+      productStore.loadProducts();
+    });
 
     return {
-      products,
       columns,
+      products,
       currentPage,
-      limit,
       totalPages,
       totalProducts,
-      nextPage,
-      prevPage,
+      nextPage: productStore.nextPage,
+      prevPage: productStore.prevPage,
       deleteProduct,
-      loadProducts,
     };
   },
 });
