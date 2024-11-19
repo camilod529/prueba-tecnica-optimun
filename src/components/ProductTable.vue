@@ -46,13 +46,14 @@
       >
         Anterior
       </button>
-      <span>Página {{ currentPage }}</span>
+      <span>Página {{ currentPage }} de {{ totalPages }}</span>
+      <span>Total de productos: {{ totalProducts }}</span>
       <button
         @click="nextPage"
-        :disabled="products.length < limit"
+        :disabled="currentPage === totalPages"
         class="px-4 py-2 rounded"
         :class="
-          products.length < limit
+          currentPage === totalPages
             ? 'bg-gray-300 cursor-not-allowed'
             : 'bg-blue-500 text-white hover:bg-blue-700'
         "
@@ -90,10 +91,12 @@ export default defineComponent({
       required: true,
     },
   },
-  setup(props) {
+  setup(props, { emit }) {
     const products = ref<Product[]>([]);
     const currentPage = ref(1);
     const limit = ref(10);
+    const totalPages = ref(1);
+    const totalProducts = ref(0);
 
     const columns = ref([
       { name: "Nombre", key: "name" },
@@ -104,16 +107,22 @@ export default defineComponent({
     ]);
 
     const loadProducts = async () => {
-      products.value = await fetchProducts(currentPage.value, limit.value);
+      const response = await fetchProducts(currentPage.value, limit.value);
+      products.value = response.products;
+      totalPages.value = response.meta.totalPages;
+      totalProducts.value = response.meta.totalProducts;
       products.value.forEach((product) => {
         product.createdAt = formatDate(product.createdAt);
         product.updatedAt = formatDate(product.updatedAt);
       });
+      emit("refreshProducts");
     };
 
     const nextPage = async () => {
-      currentPage.value++;
-      await loadProducts();
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+        await loadProducts();
+      }
     };
 
     const prevPage = async () => {
@@ -135,9 +144,12 @@ export default defineComponent({
       columns,
       currentPage,
       limit,
+      totalPages,
+      totalProducts,
       nextPage,
       prevPage,
       deleteProduct,
+      loadProducts,
     };
   },
 });

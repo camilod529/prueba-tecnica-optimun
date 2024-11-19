@@ -1,5 +1,5 @@
 import axiosInstance from "../api/axiosInstance";
-import { Category, Product, Tax } from "../interfaces/interfaces";
+import { Category, Product, Tax, Meta } from "../interfaces/interfaces";
 
 export const fetchCategories = async (): Promise<Category[]> => {
   try {
@@ -16,15 +16,17 @@ export const fetchCategories = async (): Promise<Category[]> => {
 export const fetchProducts = async (
   page: number,
   limit: number
-): Promise<Product[]> => {
+): Promise<{ products: Product[]; meta: Meta }> => {
   try {
-    const response = await axiosInstance.get<{ data: { products: Product[] } }>(
-      "/product",
-      {
-        params: { page, limit },
-      }
-    );
-    return response.data.data.products;
+    const response = await axiosInstance.get<{
+      data: { products: Product[]; meta: Meta };
+    }>("/product", {
+      params: { page, limit },
+    });
+    return {
+      products: response.data.data.products,
+      meta: response.data.data.meta,
+    };
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error;

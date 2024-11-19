@@ -27,3 +27,10 @@ export interface Tax {
   name: string;
   percentage: number;
 }
+
+export interface Meta {
+  page: number;
+  totalPages: number;
+  totalProducts: number;
+  totalReturnedProducts: number;
+}
