@@ -229,7 +229,6 @@ export default defineComponent({
       { name: "Categoría", key: "category.name" },
       { name: "Fecha de creacion", key: "createdAt" },
       { name: "Fecha de actualizacion", key: "updatedAt" },
-      { name: "Acciones", key: "actions", slot: true },
     ]);
     const taxColumns = ref([
       { name: "Código", key: "code" },
